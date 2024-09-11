@@ -10,24 +10,26 @@ let isRecording = false;
 let mediaRecorder;
 let audioChunks = [];
 let transcriber;
+let currentPlayingButton = null;
 
 const status = document.getElementById('status');
 const recordButton = document.getElementById('recordButton');
 const memoList = document.getElementById('memoList');
+const audioPlayer = document.getElementById('audioPlayer');
 
 // Initialize the transcriber
 async function initializeTranscriber() {
-	try {
-		transcriber = await pipeline(
-			'automatic-speech-recognition',
-			'Xenova/whisper-tiny.en'
-		);
-		status.textContent = 'Model loaded. Ready to record.';
-		recordButton.disabled = false;
-	} catch (error) {
-		console.error('Error initializing transcriber:', error);
-		status.textContent = 'Error loading model. Please refresh the page.';
-	}
+    try {
+			transcriber = await pipeline(
+				'automatic-speech-recognition',
+				'Xenova/whisper-tiny.en'
+			);
+			status.textContent = 'Model loaded. Ready to record.';
+			recordButton.disabled = false;
+		} catch (error) {
+			console.error('Error initializing transcriber:', error);
+			status.textContent = 'Error loading model. Please refresh the page.';
+		}
 }
 
 initializeTranscriber();
@@ -35,31 +37,33 @@ initializeTranscriber();
 recordButton.addEventListener('click', toggleRecording);
 
 async function toggleRecording() {
-	if (!isRecording) {
-		try {
-			const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-			mediaRecorder = new MediaRecorder(stream);
-			mediaRecorder.ondataavailable = (event) => {
-				audioChunks.push(event.data);
-			};
-			mediaRecorder.onstop = processAudio;
-			mediaRecorder.start();
-			isRecording = true;
-			recordButton.textContent = 'Stop Recording';
-			recordButton.style.backgroundColor = '#f44336';
-			status.textContent = 'Recording...';
-		} catch (err) {
-			console.error('Error accessing microphone:', err);
-			status.textContent =
-				'Unable to access the microphone. Please check your browser settings.';
+    if (!isRecording) {
+			try {
+				const stream = await navigator.mediaDevices.getUserMedia({
+					audio: true,
+				});
+				mediaRecorder = new MediaRecorder(stream);
+				mediaRecorder.ondataavailable = (event) => {
+					audioChunks.push(event.data);
+				};
+				mediaRecorder.onstop = processAudio;
+				mediaRecorder.start();
+				isRecording = true;
+				recordButton.textContent = 'Stop Recording';
+				recordButton.style.backgroundColor = '#f44336';
+				status.textContent = 'Recording...';
+			} catch (err) {
+				console.error('Error accessing microphone:', err);
+				status.textContent =
+					'Unable to access the microphone. Please check your browser settings.';
+			}
+		} else {
+			mediaRecorder.stop();
+			isRecording = false;
+			recordButton.textContent = 'Start Recording';
+			recordButton.style.backgroundColor = '#4CAF50';
+			status.textContent = 'Processing audio...';
 		}
-	} else {
-		mediaRecorder.stop();
-		isRecording = false;
-		recordButton.textContent = 'Start Recording';
-		recordButton.style.backgroundColor = '#4CAF50';
-		status.textContent = 'Processing audio...';
-	}
 }
 
 async function processAudio() {
@@ -84,7 +88,7 @@ async function processAudio() {
 		);
 
 		const result = await transcriber(resampledData);
-		displayMemo(result.text);
+		displayMemo(result.text, audioBlob);
 		status.textContent = 'Ready to record.';
 	} catch (error) {
 		console.error('Error processing audio:', error);
@@ -106,9 +110,59 @@ function resampleAudio(audioData, oldSampleRate, newSampleRate) {
 	return result;
 }
 
-function displayMemo(text) {
+function displayMemo(text, audioBlob) {
 	const memoItem = document.createElement('div');
 	memoItem.classList.add('memo-item');
-	memoItem.textContent = text;
+
+	const textSpan = document.createElement('span');
+	textSpan.textContent = text;
+	memoItem.appendChild(textSpan);
+
+	const playButton = document.createElement('button');
+	playButton.classList.add('play-button');
+	playButton.textContent = '▶️';
+	playButton.addEventListener('click', () =>
+		togglePlayback(playButton, audioBlob)
+	);
+	memoItem.appendChild(playButton);
+
 	memoList.insertBefore(memoItem, memoList.firstChild);
 }
+
+function togglePlayback(button, audioBlob) {
+	if (currentPlayingButton && currentPlayingButton !== button) {
+		currentPlayingButton.textContent = '▶️';
+	}
+
+	if (button.textContent === '▶️') {
+		audioPlayer.src = URL.createObjectURL(audioBlob);
+		audioPlayer.play();
+		button.textContent = '⏸️';
+		currentPlayingButton = button;
+	} else {
+		if (audioPlayer.paused) {
+			audioPlayer.play();
+			button.textContent = '⏸️';
+		} else {
+			audioPlayer.pause();
+			button.textContent = '▶️';
+		}
+	}
+
+	audioPlayer.onended = () => {
+		button.textContent = '▶️';
+		currentPlayingButton = null;
+	};
+}
+
+audioPlayer.addEventListener('play', () => {
+	if (currentPlayingButton) {
+		currentPlayingButton.textContent = '⏸️';
+	}
+});
+
+audioPlayer.addEventListener('pause', () => {
+	if (currentPlayingButton) {
+		currentPlayingButton.textContent = '▶️';
+	}
+});

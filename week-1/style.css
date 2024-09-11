@@ -40,6 +40,15 @@ body {
 .memo-item {
     background-color: #f0f0f0;
     padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;    border-radius: 5px;
+}
+
+.play-button {
+    margin-left: 10px;
+    font-size: 24px;
+    cursor: pointer;
+    background: none;
+    border: none;
 }
