@@ -3,9 +3,6 @@ import {
 	env,
 } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2';
 
-// Disable local models
-env.allowLocalModels = false;
-
 let isRecording = false;
 let mediaRecorder;
 let audioChunks = [];
@@ -19,17 +16,17 @@ const audioPlayer = document.getElementById('audioPlayer');
 
 // Initialize the transcriber
 async function initializeTranscriber() {
-    try {
-			transcriber = await pipeline(
-				'automatic-speech-recognition',
-				'Xenova/whisper-tiny.en'
-			);
-			status.textContent = 'Model loaded. Ready to record.';
-			recordButton.disabled = false;
-		} catch (error) {
-			console.error('Error initializing transcriber:', error);
-			status.textContent = 'Error loading model. Please refresh the page.';
-		}
+	try {
+		transcriber = await pipeline(
+			'automatic-speech-recognition',
+			'Xenova/whisper-tiny.en'
+		);
+		status.textContent = 'Model loaded. Ready to record.';
+		recordButton.disabled = false;
+	} catch (error) {
+		console.error('Error initializing transcriber:', error);
+		status.textContent = 'Error loading model. Please refresh the page.';
+	}
 }
 
 initializeTranscriber();
@@ -37,33 +34,33 @@ initializeTranscriber();
 recordButton.addEventListener('click', toggleRecording);
 
 async function toggleRecording() {
-    if (!isRecording) {
-			try {
-				const stream = await navigator.mediaDevices.getUserMedia({
-					audio: true,
-				});
-				mediaRecorder = new MediaRecorder(stream);
-				mediaRecorder.ondataavailable = (event) => {
-					audioChunks.push(event.data);
-				};
-				mediaRecorder.onstop = processAudio;
-				mediaRecorder.start();
-				isRecording = true;
-				recordButton.textContent = 'Stop Recording';
-				recordButton.style.backgroundColor = '#f44336';
-				status.textContent = 'Recording...';
-			} catch (err) {
-				console.error('Error accessing microphone:', err);
-				status.textContent =
-					'Unable to access the microphone. Please check your browser settings.';
-			}
-		} else {
-			mediaRecorder.stop();
-			isRecording = false;
-			recordButton.textContent = 'Start Recording';
-			recordButton.style.backgroundColor = '#4CAF50';
-			status.textContent = 'Processing audio...';
+	if (!isRecording) {
+		try {
+			const stream = await navigator.mediaDevices.getUserMedia({
+				audio: true,
+			});
+			mediaRecorder = new MediaRecorder(stream);
+			mediaRecorder.ondataavailable = (event) => {
+				audioChunks.push(event.data);
+			};
+			mediaRecorder.onstop = processAudio;
+			mediaRecorder.start();
+			isRecording = true;
+			recordButton.textContent = 'Stop Recording';
+			recordButton.style.backgroundColor = '#f44336';
+			status.textContent = 'Recording...';
+		} catch (err) {
+			console.error('Error accessing microphone:', err);
+			status.textContent =
+				'Unable to access the microphone. Please check your browser settings.';
 		}
+	} else {
+		mediaRecorder.stop();
+		isRecording = false;
+		recordButton.textContent = 'Start Recording';
+		recordButton.style.backgroundColor = '#4CAF50';
+		status.textContent = 'Processing audio...';
+	}
 }
 
 async function processAudio() {
@@ -89,6 +86,7 @@ async function processAudio() {
 
 		const result = await transcriber(resampledData);
 		displayMemo(result.text, audioBlob);
+		window.addMemoToCanvas(result.text); // Add text to canvas
 		status.textContent = 'Ready to record.';
 	} catch (error) {
 		console.error('Error processing audio:', error);
