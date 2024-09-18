@@ -14,8 +14,7 @@ const url = 'https://replicate-api-proxy.glitch.me/create_n_get/';
 // Instance for doodle canvas
 let doodleSketch = function (p) {
 	p.setup = function () {
-		let canvas = p.createCanvas(280, 280);
-		canvas.id('sketchCanvas');
+		let canvas = p.createCanvas(280, 280, 'sketchCanvas');
 		p.background(255);
 		p.stroke(0);
 		p.strokeWeight(12);
@@ -61,7 +60,7 @@ let doodleSketch = function (p) {
 // Instance for camera view
 let cameraSketch = function (p) {
 	p.setup = function () {
-		p.createCanvas(280, 280);
+		p.createCanvas(280, 280, 'cameraCanvas');
 		video = p.createCapture(p.VIDEO);
 		video.hide();
 		video.size(374, 280);
@@ -92,8 +91,8 @@ let cameraSketch = function (p) {
 
 // Load models and initialize p5 instances
 modelLoader().then(() => {
-	new p5(doodleSketch);
-	new p5(cameraSketch);
+	new p5(doodleSketch, 'doodleSketchContainer');
+	new p5(cameraSketch, 'cameraSketchContainer');
 });
 
 function modelLoader() {
@@ -109,7 +108,7 @@ function gotHands(results) {
 }
 
 async function generateImageFromSketch(p) {
-	const canvas = document.getElementById('sketchCanvas');
+	const canvas = document.getElementById('defaultCanvas0');
 	const imageData = canvas.toDataURL('image/png');
 
 	document.body.style.cursor = 'progress';
@@ -155,12 +154,8 @@ async function generateImageFromSketch(p) {
 function displayResult(imageUrl) {
 	if (!resultImage) {
 		resultImage = document.createElement('img');
-		resultImage.style.position = 'absolute';
-		resultImage.style.maxWidth = '50%';
-		resultImage.style.maxHeight = '50%';
-		resultImage.style.top = '10px';
-		resultImage.style.right = '10px';
-		document.body.appendChild(resultImage);
+		resultImage.id = 'resultImage';
+		document.querySelector('.container').appendChild(resultImage);
 	}
 	resultImage.src = imageUrl;
 }

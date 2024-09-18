@@ -6,16 +6,28 @@
   <script src="https://unpkg.com/ml5@1/dist/ml5.min.js"></script>
   <link rel="stylesheet" type="text/css" href="style.css">
   <meta charset="utf-8" />
+  <title>Dimensions - Alan Ren</title>
 
 </head>
 
 <body>
   <main>
     <h1>Dimensions</h1>
-    <div class="button-container">
-      <button id="clearButton" class="clear">Clear</button>
-      <button id="genButton" class="generate">Materialize</button>
-    </div>
+    <div class="container">
+      <div class="canvas-container">
+        <div id="doodleSketchContainer">
+    
+        </div>
+        <div id="cameraSketchContainer">
+    
+        </div>
+      </div>
+      <div class="button-container">
+        <button id="clearButton" class="clear">Clear</button>
+        <button id="genButton" class="generate">Materialize</button>
+      </div>
+      <!-- The result image will be appended here -->
+      </div>
   </main>
   <script src="sketch.js"></script>
 </body>

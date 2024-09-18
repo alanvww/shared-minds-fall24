@@ -13,28 +13,37 @@ body {
 
 .container {
     background-color: white;
+    height: auto;
     border-radius: 10px;
     padding: 20px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
     align-items: center;
+    max-width: 600px;
+    width: 100%;
+}
+
+.canvas-container {
+    position: relative;
+    gap: 20px;
+    margin-bottom: 20px;
 }
 
 canvas {
     display: block;
-    margin-bottom: 20px;
     border: 2px solid #333;
     border-radius: 5px;
+    margin: 10px auto;
 }
 
 .button-container {
+    
     display: flex;
     justify-content: center;
     gap: 10px;
     margin-top: 15px;
-    margin-bottom: 15px;
-
+    margin-bottom: 20px;
 }
 
 button {
@@ -82,9 +91,9 @@ button.generate:hover {
 #resultImage {
     max-width: 100%;
     height: auto;
-    margin-top: 20px;
     border-radius: 5px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
 }
 
 @media (max-width: 600px) {
