@@ -22,7 +22,7 @@ async function getNoteAndUpdateReadTimes(uuid: string) {
 
 	// Decrement readTimes if it's not null
 	if (note.readTimes !== null) {
-		if (note.readTimes > 1) {
+		if (note.readTimes >= 1) {
 			await supabase
 				.from('notes')
 				.update({ readTimes: note.readTimes - 1 })
@@ -64,10 +64,14 @@ export default async function NotePage({
 				</CardHeader>
 				<CardContent>
 					<p className="text-lg font-semibold mb-2">{note.text}</p>
-					<p className="text-sm text-gray-500">
+					<p
+						className={`${note.readTimes >= 1 ? 'text-gray-500' : 'text-red-600'} text-sm `}
+					>
 						{note.readTimes === null
 							? 'This note can be read unlimited times'
-							: `This note can be read ${note.readTimes} more time${note.readTimes !== 1 ? 's' : ''}`}
+							: note.readTimes >= 1
+								? `This note can be read ${note.readTimes} more time${note.readTimes !== 1 ? 's' : ''}`
+								: 'This note will not be available after you close this tab.'}
 					</p>
 				</CardContent>
 			</Card>
