@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatDistanceToNow } from 'date-fns';
 import NoteContent from './NoteContent';
+import DeleteNote from './DeleteNote';
 
 interface Note {
 	id: number;
@@ -11,6 +12,8 @@ interface Note {
 	readTimes: number | null;
 	created_at: string;
 }
+
+export const dynamic = 'force-dynamic';
 
 async function getNoteWithoutUpdating(uuid: string): Promise<Note | null> {
 	const supabase = createClient();
@@ -52,6 +55,7 @@ export default async function NotePage({
 					<NoteContent initialNote={note} />
 				</CardContent>
 			</Card>
+			{note.readTimes === 0 && <DeleteNote uuid={note.uuid} />}
 		</div>
 	);
 }
