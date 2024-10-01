@@ -12,8 +12,6 @@ interface Note {
 	created_at: string;
 }
 
-export const dynamic = 'force-dynamic';
-
 async function getNoteWithoutUpdating(uuid: string): Promise<Note | null> {
 	const supabase = createClient();
 
