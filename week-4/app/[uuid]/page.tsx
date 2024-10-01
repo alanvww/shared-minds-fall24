@@ -1,15 +1,22 @@
-// app/notes/[id]/page.tsx
 import { createClient } from '@/utils/supabase/server';
 import { notFound } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatDistanceToNow } from 'date-fns';
+import NoteContent from './NoteContent';
+
+interface Note {
+	id: number;
+	uuid: string;
+	text: string;
+	readTimes: number | null;
+	created_at: string;
+}
 
 export const dynamic = 'force-dynamic';
 
-async function getNoteAndUpdateReadTimes(uuid: string) {
+async function getNoteWithoutUpdating(uuid: string): Promise<Note | null> {
 	const supabase = createClient();
 
-	// Fetch the note
 	const { data: note, error } = await supabase
 		.from('notes')
 		.select('*')
@@ -20,22 +27,7 @@ async function getNoteAndUpdateReadTimes(uuid: string) {
 		return null;
 	}
 
-	// Decrement readTimes if it's not null
-	if (note.readTimes !== null) {
-		if (note.readTimes >= 1) {
-			await supabase
-				.from('notes')
-				.update({ readTimes: note.readTimes - 1 })
-				.eq('id', note.id);
-			note.readTimes -= 1;
-		} else {
-			// Delete the note if readTimes reaches 0
-			await supabase.from('notes').delete().eq('uuid', note.uuid);
-			return 'deleted';
-		}
-	}
-
-	return note;
+	return note as Note;
 }
 
 export default async function NotePage({
@@ -43,14 +35,10 @@ export default async function NotePage({
 }: {
 	params: { uuid: string };
 }) {
-	const note = await getNoteAndUpdateReadTimes(params.uuid);
+	const note = await getNoteWithoutUpdating(params.uuid);
 
 	if (note === null) {
 		notFound();
-	}
-
-	if (note === 'deleted') {
-		return <div>This note has been deleted.</div>;
 	}
 
 	return (
@@ -63,16 +51,7 @@ export default async function NotePage({
 					</CardTitle>
 				</CardHeader>
 				<CardContent>
-					<p className="text-lg font-semibold mb-2">{note.text}</p>
-					<p
-						className={`${note.readTimes >= 1 ? 'text-gray-500' : 'text-red-600'} text-sm `}
-					>
-						{note.readTimes === null
-							? 'This note can be read unlimited times'
-							: note.readTimes >= 1
-								? `This note can be read ${note.readTimes} more time${note.readTimes !== 1 ? 's' : ''}`
-								: 'This note will not be available after you close this tab.'}
-					</p>
+					<NoteContent initialNote={note} />
 				</CardContent>
 			</Card>
 		</div>
