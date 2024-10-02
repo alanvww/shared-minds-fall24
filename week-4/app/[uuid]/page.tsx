@@ -39,7 +39,17 @@ export default async function NotePage({
 	const note = await getNoteWithoutUpdating(params.uuid);
 
 	if (note === null) {
-		notFound();
+		return (
+			<div className="container mx-auto px-4 py-8 w-full">
+				<Card className="mb-4">
+					<CardHeader>
+						<CardTitle className="text-sm font-medium">
+							Note not found
+						</CardTitle>
+					</CardHeader>
+				</Card>
+			</div>
+		);
 	}
 
 	return (
@@ -55,7 +65,7 @@ export default async function NotePage({
 					<NoteContent initialNote={note} />
 				</CardContent>
 			</Card>
-			{note.readTimes === 0 && <DeleteNote uuid={note.uuid} />}
+			{note.readTimes === 1 && <DeleteNote uuid={note.uuid} />}
 		</div>
 	);
 }
