@@ -45,7 +45,6 @@ export default function TextEditor({ onNoteCreated }: TextEditorProps) {
 
 	return (
 		<form onSubmit={handleSubmit} className="w-full">
-			<Label htmlFor="message">Your note</Label>
 			<Textarea
 				className="h-48 w-full"
 				placeholder="Type something..."
@@ -54,28 +53,35 @@ export default function TextEditor({ onNoteCreated }: TextEditorProps) {
 				onChange={(e) => setText(e.target.value)}
 			/>
 			<div className="flex md:flex-row flex-col gap-2 py-5 w-full ">
-				<Select
-					onValueChange={(value) =>
-						setReadTimes(value === 'unlimited' ? null : Number(value))
-					}
-				>
-					<SelectTrigger className="">
-						<SelectValue placeholder="How many times can this message be read?" />
-					</SelectTrigger>
-					<SelectContent>
-						<SelectItem value="unlimited">Unlimited</SelectItem>
-						<SelectItem value="1">1</SelectItem>
-						<SelectItem value="2">2</SelectItem>
-						<SelectItem value="3">3</SelectItem>
-						<SelectItem value="4">4</SelectItem>
-						<SelectItem value="5">5</SelectItem>
-					</SelectContent>
-				</Select>
+				<div className="flex-grow">
+					{' '}
+					<Label htmlFor="readTimes">
+						How many times can this message be read?
+					</Label>
+					<Select
+						onValueChange={(value) =>
+							setReadTimes(value === 'unlimited' ? null : Number(value))
+						}
+					>
+						<SelectTrigger className="" id="readTimes">
+							<SelectValue placeholder="Unlimited" />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="unlimited">Unlimited</SelectItem>
+							<SelectItem value="1">1</SelectItem>
+							<SelectItem value="2">2</SelectItem>
+							<SelectItem value="3">3</SelectItem>
+							<SelectItem value="4">4</SelectItem>
+							<SelectItem value="5">5</SelectItem>
+						</SelectContent>
+					</Select>
+				</div>
+
 				<Button
 					variant={isDisabled ? 'outline' : 'secondary'}
 					type="submit"
 					disabled={isDisabled}
-					className="flex-grow"
+					className="flex-grow mt-auto bottom-0 align-bottom"
 				>
 					{isDisabled ? 'Please type something' : 'Submit'}
 				</Button>
