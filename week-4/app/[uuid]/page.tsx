@@ -29,7 +29,7 @@ async function getNoteAndUpdate(uuid: string): Promise<Note | null> {
 
 	if (note.readTimes === 1) {
 		await supabase.from('notes').delete().eq('uuid', uuid);
-	} else if (note.readTimes !== null && note.readTimes > 0) {
+	} else if (note.readTimes !== null && note.readTimes > 1) {
 		await supabase
 			.from('notes')
 			.update({ readTimes: note.readTimes - 1 })
