@@ -1,0 +1,122 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    overflow-x: hidden;
+}
+#topics-container {
+    position: relative;
+    height: auto;
+    overflow-y: auto;
+    padding-left: 10vw;
+    padding-right: 10vw; 
+}
+#topics-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 10px;
+    padding: 10px;
+}
+.topic {
+    padding: 10px;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.5s ease;
+    background-color: #fff;
+    position: relative;
+}
+.topic:hover {
+    background-color: #f0f0f0;
+}
+.topic.selected {
+    border-color: #3498db;
+    background-color: #e8f4fd;
+    z-index: 1;
+}
+.topic.faded {
+    opacity: 0.3;
+    background-color: #f0f0f0;
+    color: #999;
+}
+.hidden {
+    display: none;
+}
+.loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+.spinner {
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #3498db;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+.loading-message-container {
+    height: 30px;
+    overflow: hidden;
+}
+.loading-message {
+    animation: slideUp 0.5s ease-in-out;
+    margin: 0;
+    padding: 0;
+}
+@keyframes slideUp {
+    0% { transform: translateY(100%); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+}
+.thumbs-up {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    color: #3498db;
+    cursor: pointer;
+    display: none;
+}
+.topic:not(.faded) .thumbs-up {
+    display: block;
+}
+.delete-button {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    color: #e74c3c;
+    cursor: pointer;
+    display: none;
+}
+.topic.faded .delete-button {
+    display: block;
+}
+#progress-bar-container {
+    width: 80%;
+    background-color: #f0f0f0;
+    border-radius: 10px;
+    margin: 20px 0;
+}
+#progress-bar {
+    width: 0;
+    height: 20px;
+    background-color: #3498db;
+    border-radius: 10px;
+    transition: none;
+}
+#progress-text {
+    font-size: 14px;
+    color: #333;
+}

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Smartest News Reader</title>
+    <link rel="icon" href="https://fav.farm/👓" />
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+    <div id="loading-screen" class="loading">
+        <div class="spinner"></div>
+        <div class="loading-message-container">
+            <p id="loading-message" class="loading-message"></p>
+        </div>
+        <div id="progress-bar-container">
+            <div id="progress-bar"></div>
+        </div>
+        <p id="progress-text">Processing topics: 0 / 0</p>
+    </div>
+    <div id="main-content" class="hidden">
+        <h1>The Smartest News Reader</h1>
+        <div id="topics-container">
+            <div id="topics-list"></div>
+        </div>
+    </div>
+
+    <script type="module" src="main.js"></script>
+</body>
+</html>
