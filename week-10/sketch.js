@@ -9,7 +9,7 @@ let imageArray = [];
 let isGenerating = false;
 
 function preload() {
-    handPose = ml5.handPose({  maxHands: 2, flipped: true });
+    handPose = ml5.handPose({ maxHands: 2, flipped: true });
 }
 
 function setup() {
@@ -34,7 +34,6 @@ function setup() {
 }
 
 function initializeDraggableElements() {
-    // Get all elements with class 'draggable'
     const elements = document.querySelectorAll('.draggable');
     elements.forEach(element => {
         const dragHandler = new DraggableHandler(element);
@@ -44,7 +43,7 @@ function initializeDraggableElements() {
 
 function initializePromptInput() {
     const promptInput = document.getElementById('promptInput');
-    promptInput.addEventListener('keydown', async function (event) {
+    promptInput.addEventListener('keydown', async function(event) {
         if (event.key === 'Enter' && !isGenerating) {
             const prompt = this.value.trim();
             if (prompt) {
@@ -84,7 +83,7 @@ async function generateImages(prompt) {
 
         if (result.output && result.output.length > 0) {
             imageArray = [...imageArray, ...result.output];
-            updateImageGrid();
+            createFloatingImages(result.output);
             apiStatus.className = 'status-dot active';
             apiStatusText.textContent = 'Generated Successfully';
         } else {
@@ -99,29 +98,31 @@ async function generateImages(prompt) {
     }
 }
 
-function updateImageGrid() {
-    const container = document.getElementById('generatedImages');
+function createFloatingImages(images) {
+    images.forEach(imageUrl => {
+        // Create new image element
+        const img = document.createElement('img');
+        img.className = 'floating-image draggable';
+        img.src = imageUrl;
+        img.alt = 'Generated image';
 
-    // Create new image elements for the latest batch
-    imageArray.forEach((imageUrl, index) => {
-        const existingImage = container.querySelector(`[data-index="${index}"]`);
-        if (!existingImage) {
-            const imageContainer = document.createElement('div');
-            imageContainer.className = 'generated-image-container draggable';
-            imageContainer.setAttribute('data-index', index);
+        // Generate random position within viewport
+        const maxX = window.innerWidth - 200;
+        const maxY = window.innerHeight - 200;
+        
+        const randomX = Math.max(0, Math.floor(Math.random() * maxX));
+        const randomY = Math.max(0, Math.floor(Math.random() * maxY));
 
-            const img = document.createElement('img');
-            img.className = 'generated-image';
-            img.src = imageUrl;
-            img.alt = `Generated image ${index + 1}`;
+        // Set initial position
+        img.style.left = `${randomX}px`;
+        img.style.top = `${randomY}px`;
 
-            imageContainer.appendChild(img);
-            container.appendChild(imageContainer);
+        // Add to document
+        document.body.appendChild(img);
 
-            // Add to draggable elements
-            const dragHandler = new DraggableHandler(imageContainer);
-            draggableElements.push(dragHandler);
-        }
+        // Initialize draggable behavior
+        const dragHandler = new DraggableHandler(img);
+        draggableElements.push(dragHandler);
     });
 }
 
@@ -137,39 +138,56 @@ class DraggableHandler {
         this.initialHandPositions = null;
         this.initialDimensions = null;
         
-        // Find the header if it exists (for cards)
         this.header = element.querySelector('.card-header');
         
-        // Initialize mouse drag events
         if (this.header) {
             this.initMouseDrag(this.header);
         } else {
             this.initMouseDrag(this.element);
         }
 
-        // Add double click listener for resize
+        if (element.classList.contains('floating-image')) {
+            this.initImageBehavior();
+        }
+
         this.element.addEventListener('dblclick', () => {
             const currentWidth = parseInt(getComputedStyle(this.element).width);
             this.element.style.width = `${currentWidth + 50}px`;
-            if (this.element.classList.contains('generated-image-container')) {
+            if (this.element.classList.contains('floating-image')) {
                 this.element.style.height = `${currentWidth + 50}px`;
             }
         });
     }
 
+    initImageBehavior() {
+        this.element.addEventListener('load', () => {
+            this.element.style.opacity = '1';
+        });
+
+        this.element.addEventListener('error', () => {
+            this.element.style.display = 'none';
+        });
+
+        this.element.addEventListener('mousedown', () => {
+            this.element.classList.add('dragging');
+        });
+
+        document.addEventListener('mouseup', () => {
+            this.element.classList.remove('dragging');
+        });
+    }
+
     initMouseDrag(dragElement) {
         dragElement.addEventListener('mousedown', (e) => {
-            if (e.button !== 0) return; // Only left mouse button
+            if (e.button !== 0) return;
             
             this.isMouseDragging = true;
             this.element.style.zIndex = '1000';
             
-            // Calculate offset from mouse position to element corner
             const rect = this.element.getBoundingClientRect();
             this.offsetX = e.clientX - rect.left;
             this.offsetY = e.clientY - rect.top;
             
-            // Set absolute positioning if not already set
             if (getComputedStyle(this.element).position !== 'absolute') {
                 this.element.style.position = 'absolute';
                 this.element.style.left = `${rect.left}px`;
@@ -226,7 +244,6 @@ class DraggableHandler {
             hand2.thumb_tip.y
         );
 
-        // Calculate pinch centers
         const pinch1Center = {
             x: (hand1.index_finger_tip.x + hand1.thumb_tip.x) / 2,
             y: (hand1.index_finger_tip.y + hand1.thumb_tip.y) / 2
@@ -243,7 +260,6 @@ class DraggableHandler {
             y: rect.top + rect.height / 2
         };
 
-        // Check if hands are near the element
         const handsMidpoint = {
             x: (pinch1Center.x + pinch2Center.x) / 2,
             y: (pinch1Center.y + pinch2Center.y) / 2
@@ -258,10 +274,8 @@ class DraggableHandler {
 
         const isNearElement = distanceToElement < rect.width;
 
-        // If both hands are pinching and near the element
         if (pinch1Distance < PINCH_THRESHOLD && pinch2Distance < PINCH_THRESHOLD && isNearElement) {
             if (!this.isTwoHandResizing) {
-                // Initialize resize
                 this.isTwoHandResizing = true;
                 this.isHandDragging = false;
                 this.initialHandPositions = {
@@ -275,20 +289,21 @@ class DraggableHandler {
                 this.element.style.zIndex = '1000';
             }
 
-            // Calculate width and height based on hand distances
+            // Calculate new dimensions based on hand movement
             const currentWidth = Math.abs(pinch1Center.x - pinch2Center.x);
             const currentHeight = Math.abs(pinch1Center.y - pinch2Center.y);
             
-            const initialWidth = Math.abs(
+            // Calculate scaling factors
+            const widthScale = currentWidth / Math.abs(
                 this.initialHandPositions.pinch1.x - this.initialHandPositions.pinch2.x
             );
-            const initialHeight = Math.abs(
+            const heightScale = currentHeight / Math.abs(
                 this.initialHandPositions.pinch1.y - this.initialHandPositions.pinch2.y
             );
 
-            // Calculate new dimensions with relative changes
-            let newWidth = this.initialDimensions.width * (currentWidth / initialWidth);
-            let newHeight = this.initialDimensions.height * (currentHeight / initialHeight);
+            // Apply scaling to initial dimensions
+            let newWidth = this.initialDimensions.width * widthScale;
+            let newHeight = this.initialDimensions.height * heightScale;
 
             // Apply constraints
             const minSize = 100;
@@ -300,18 +315,14 @@ class DraggableHandler {
 
             // Update element dimensions
             this.element.style.width = `${newWidth}px`;
-            
-            // For image containers, maintain square aspect ratio
-            if (this.element.classList.contains('generated-image-container')) {
-                this.element.style.height = `${newWidth}px`;  // Keep square aspect ratio
-                this.element.style.paddingBottom = '0';
+            if (this.element.classList.contains('floating-image')) {
+                this.element.style.height = `${newWidth}px`;  // Keep square for images
             } else {
                 this.element.style.height = `${newHeight}px`;
             }
 
             return true;
         } else if (this.isTwoHandResizing) {
-            // Reset when hands are released
             this.isTwoHandResizing = false;
             this.initialHandPositions = null;
             this.initialDimensions = null;
@@ -373,7 +384,7 @@ class DraggableHandler {
 
 function draw() {
     image(video, 0, 0, videoWidth, videoHeight);
-    fill(255,255,255, 100);
+    fill(255, 255, 255, 100);
     rect(0, 0, width, height);
 
     const confidenceElement = document.getElementById('confidence-value');
