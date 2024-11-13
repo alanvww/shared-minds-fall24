@@ -1,0 +1,283 @@
+/* styles.css */
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+}
+
+#canvas-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: -1;
+}
+
+.infographic-container {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+}
+
+.info-card {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    width: 300px;
+    min-height: 200px;
+    backdrop-filter: blur(10px);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.info-card:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.card-header {
+    background: rgba(0, 0, 0, 0.05);
+    padding: 15px;
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-header h3 {
+    margin: 0;
+    color: #333;
+    font-size: 1.1em;
+}
+
+.drag-handle {
+    cursor: move;
+    color: #666;
+    font-size: 1.2em;
+}
+
+.card-content {
+    padding: 20px;
+}
+
+/* Statistics Card Styles */
+.stat-item {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.stat-value {
+    font-size: 2em;
+    font-weight: bold;
+    color: #2196F3;
+    display: block;
+}
+
+.stat-label {
+    color: #666;
+    font-size: 0.9em;
+}
+
+/* Chart Card Styles */
+.chart-placeholder {
+    height: 200px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.bar-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    height: 100%;
+    width: 100%;
+    padding: 10px;
+}
+
+.bar {
+    flex: 1;
+    background: linear-gradient(to top, #2196F3, #64B5F6);
+    border-radius: 4px 4px 0 0;
+    transition: height 0.3s ease;
+}
+
+/* Notes Card Styles */
+.notes-list {
+    padding-left: 20px;
+    color: #555;
+}
+
+.notes-list li {
+    margin-bottom: 10px;
+}
+
+/* Status Card Styles */
+.status-indicator {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.status-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 10px;
+    background: #ccc;
+}
+
+.status-dot.active {
+    background: #4CAF50;
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+}
+
+.status-text {
+    color: #555;
+}
+
+.status-details {
+    font-size: 0.9em;
+    color: #666;
+}
+
+.status-details p {
+    margin: 5px 0;
+}
+
+/* Initial positions for cards */
+#stats-card {
+    top: 50px;
+    left: 50px;
+}
+
+#chart-card {
+    top: 50px;
+    right: 50px;
+}
+
+#notes-card {
+    bottom: 50px;
+    left: 50px;
+}
+
+#status-card {
+    bottom: 50px;
+    right: 50px;
+}
+
+/* Add these styles to your existing CSS */
+.input-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#promptInput {
+    width: 80%;
+    padding: 10px;
+	margin: 0 auto;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.images-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+.generated-image-container {
+    position: relative;
+    width: 100%;
+    padding-bottom: 100%; /* Square aspect ratio */
+    overflow: hidden;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.generated-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.generated-image:hover {
+    transform: scale(1.05);
+}
+
+#images-container {
+    width: 400px;
+}
+
+.loading-indicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+#api-status.active {
+    background: #4CAF50;
+}
+
+#api-status.loading {
+    background: #FFC107;
+    animation: pulse 1s infinite;
+}
+
+#api-status.error {
+    background: #F44336;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.5; }
+    50% { opacity: 1; }
+    100% { opacity: 0.5; }
+}
+
+.card-header {
+    cursor: grab;
+    user-select: none;
+}
+
+.card-header:active {
+    cursor: grabbing;
+}
+
+.info-card {
+    position: absolute; /* Ensure all cards are absolutely positioned */
+    transform: translate(0, 0); /* Reset any transforms */
+    touch-action: none; /* Prevent scrolling while dragging on touch devices */
+}
+
+.generated-image-container {
+    cursor: grab;
+    transition: transform 0.2s ease;
+}
+
+.generated-image-container:active {
+    cursor: grabbing;
+}
+
+/* Add smooth transition for drag start/end */
+.draggable {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.draggable:active {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
