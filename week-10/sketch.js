@@ -9,7 +9,7 @@ let imageArray = [];
 let isGenerating = false;
 
 function preload() {
-    handPose = ml5.handPose({ maxHands: 2, flipped: true });
+    handPose = ml5.handPose({ runtime: "mediapipe", maxHands: 2, flipped: true });
 }
 
 function setup() {
@@ -43,7 +43,7 @@ function initializeDraggableElements() {
 
 function initializePromptInput() {
     const promptInput = document.getElementById('promptInput');
-    promptInput.addEventListener('keydown', async function(event) {
+    promptInput.addEventListener('keydown', async function (event) {
         if (event.key === 'Enter' && !isGenerating) {
             const prompt = this.value.trim();
             if (prompt) {
@@ -109,7 +109,7 @@ function createFloatingImages(images) {
         // Generate random position within viewport
         const maxX = window.innerWidth - 200;
         const maxY = window.innerHeight - 200;
-        
+
         const randomX = Math.max(0, Math.floor(Math.random() * maxX));
         const randomY = Math.max(0, Math.floor(Math.random() * maxY));
 
@@ -137,9 +137,9 @@ class DraggableHandler {
         this.offsetY = 0;
         this.initialHandPositions = null;
         this.initialDimensions = null;
-        
+
         this.header = element.querySelector('.card-header');
-        
+
         if (this.header) {
             this.initMouseDrag(this.header);
         } else {
@@ -180,43 +180,43 @@ class DraggableHandler {
     initMouseDrag(dragElement) {
         dragElement.addEventListener('mousedown', (e) => {
             if (e.button !== 0) return;
-            
+
             this.isMouseDragging = true;
             this.element.style.zIndex = '1000';
-            
+
             const rect = this.element.getBoundingClientRect();
             this.offsetX = e.clientX - rect.left;
             this.offsetY = e.clientY - rect.top;
-            
+
             if (getComputedStyle(this.element).position !== 'absolute') {
                 this.element.style.position = 'absolute';
                 this.element.style.left = `${rect.left}px`;
                 this.element.style.top = `${rect.top}px`;
             }
-            
+
             document.addEventListener('mousemove', this.handleMouseMove);
             document.addEventListener('mouseup', this.handleMouseUp);
-            
+
             e.preventDefault();
         });
-        
+
         this.handleMouseMove = this.handleMouseMove.bind(this);
         this.handleMouseUp = this.handleMouseUp.bind(this);
     }
 
     handleMouseMove(e) {
         if (!this.isMouseDragging) return;
-        
+
         const x = e.clientX - this.offsetX;
         const y = e.clientY - this.offsetY;
-        
+
         const maxX = window.innerWidth - this.element.offsetWidth;
         const maxY = window.innerHeight - this.element.offsetHeight;
-        
+
         this.element.style.left = `${Math.min(Math.max(0, x), maxX)}px`;
         this.element.style.top = `${Math.min(Math.max(0, y), maxY)}px`;
     }
-    
+
     handleMouseUp() {
         this.isMouseDragging = false;
         this.element.style.zIndex = '1';
@@ -231,27 +231,27 @@ class DraggableHandler {
         const hand2 = hands[1];
 
         const pinch1Distance = dist(
-            hand1.index_finger_tip.x, 
-            hand1.index_finger_tip.y, 
-            hand1.thumb_tip.x, 
-            hand1.thumb_tip.y
+            hand1.index_finger_tip.x * width / 640,
+            hand1.index_finger_tip.y * width / 640,
+            hand1.thumb_tip.x * width / 640,
+            hand1.thumb_tip.y * width / 640
         );
 
         const pinch2Distance = dist(
-            hand2.index_finger_tip.x, 
-            hand2.index_finger_tip.y, 
-            hand2.thumb_tip.x, 
-            hand2.thumb_tip.y
+            hand2.index_finger_tip.x * width / 640,
+            hand2.index_finger_tip.y * width / 640,
+            hand2.thumb_tip.x * width / 640,
+            hand2.thumb_tip.y * width / 640
         );
 
         const pinch1Center = {
-            x: (hand1.index_finger_tip.x + hand1.thumb_tip.x) / 2,
-            y: (hand1.index_finger_tip.y + hand1.thumb_tip.y) / 2
+            x: (hand1.index_finger_tip.x * width / 640 + hand1.thumb_tip.x * width / 640) / 2,
+            y: (hand1.index_finger_tip.y * width / 640 + hand1.thumb_tip.y * width / 640) / 2
         };
 
         const pinch2Center = {
-            x: (hand2.index_finger_tip.x + hand2.thumb_tip.x) / 2,
-            y: (hand2.index_finger_tip.y + hand2.thumb_tip.y) / 2
+            x: (hand2.index_finger_tip.x * width / 640 + hand2.thumb_tip.x * width / 640) / 2,
+            y: (hand2.index_finger_tip.y * width / 640 + hand2.thumb_tip.y * width / 640) / 2
         };
 
         const rect = this.element.getBoundingClientRect();
@@ -264,7 +264,7 @@ class DraggableHandler {
             x: (pinch1Center.x + pinch2Center.x) / 2,
             y: (pinch1Center.y + pinch2Center.y) / 2
         };
-        
+
         const distanceToElement = dist(
             elementCenter.x,
             elementCenter.y,
@@ -292,7 +292,7 @@ class DraggableHandler {
             // Calculate new dimensions based on hand movement
             const currentWidth = Math.abs(pinch1Center.x - pinch2Center.x);
             const currentHeight = Math.abs(pinch1Center.y - pinch2Center.y);
-            
+
             // Calculate scaling factors
             const widthScale = currentWidth / Math.abs(
                 this.initialHandPositions.pinch1.x - this.initialHandPositions.pinch2.x
@@ -334,13 +334,13 @@ class DraggableHandler {
 
     checkPinch(indexTip, thumbTip) {
         if (this.isMouseDragging || this.isTwoHandResizing) return false;
-        
-        const distance = dist(indexTip.x, indexTip.y, thumbTip.x, thumbTip.y);
+
+        const distance = dist(indexTip.x * width / 640, indexTip.y * width / 640, thumbTip.x * width / 640, thumbTip.y * width / 640);
 
         if (distance < PINCH_THRESHOLD) {
             const rect = this.element.getBoundingClientRect();
-            const handCenterX = (indexTip.x + thumbTip.x) / 2;
-            const handCenterY = (indexTip.y + thumbTip.y) / 2;
+            const handCenterX = (indexTip.x * width / 640 + thumbTip.x * width / 640) / 2;
+            const handCenterY = (indexTip.y * width / 640 + thumbTip.y * width / 640) / 2;
 
             if (this.isPointInBounds({ x: handCenterX, y: handCenterY }, rect)) {
                 if (!this.isHandDragging) {
@@ -369,8 +369,8 @@ class DraggableHandler {
 
     update(indexTip, thumbTip) {
         if (this.isHandDragging && !this.isTwoHandResizing) {
-            const x = indexTip.x - this.offsetX;
-            const y = indexTip.y - this.offsetY;
+            const x = indexTip.x * width / 640 - this.offsetX;
+            const y = indexTip.y * width / 640 - this.offsetY;
 
             const maxX = window.innerWidth - this.element.offsetWidth;
             const maxY = window.innerHeight - this.element.offsetHeight;
@@ -403,8 +403,8 @@ function draw() {
             if (indexTip && thumbTip) {
                 fill(0, 0, 0, 60);
                 noStroke();
-                circle(indexTip.x, indexTip.y, 50);
-                circle(thumbTip.x, thumbTip.y, 50);
+                circle(indexTip.x * width / 640, indexTip.y * width / 640, 50);
+                circle(thumbTip.x * width / 640, thumbTip.y * width / 640, 50);
             }
         });
 
